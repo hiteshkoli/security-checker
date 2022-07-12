@@ -29,7 +29,7 @@ jobs:
       - name: Download php security checker
         run: wget https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.4/local-php-security-checker_2.0.4_linux_amd64
         
-      - name: List folders
+      - name: List files
         run: ls -l -a 
         
       - name: Rename file
@@ -37,9 +37,9 @@ jobs:
         
       - name: Change file permission
         run: chmod 0755 local-php-security-checker
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      
+      - name: List files
+        run: ls -l -a
+        
+      - name: Run security check
+        run: local-php-security-checker --path=composer.lock
