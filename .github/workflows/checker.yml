@@ -1,45 +1,50 @@
 name: Security checker
 
-
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-
 jobs:
- 
+
   build:
-   
+
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3 
-      
-      - name: Check PHP Version
-        run: php -v  
-      
+      - uses: actions/checkout@v3
+
       - name: Download php security checker
-        run: wget https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.4/local-php-security-checker_2.0.4_linux_amd64
-        
-      - name: List files
-        run: ls -l -a 
-        
+        run: wget https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.4/local-php-security-checker_2.0.4_linux_386
+
       - name: Rename file
-        run: mv local-php-security-checker_2.0.4_linux_amd64 local-php-security-checker  
-        
+        run: mv local-php-security-checker_2.0.4_linux_386 local-php-security-checker
+
       - name: Change file permission
-        run: chmod 0755 local-php-security-checker
-      
+        run: chmod 755 local-php-security-checker
+
       - name: List files
         run: ls -l -a
-        
+
       - name: Run security check
-        run: local-php-security-checker --path=composer.lock
+        run:  ./local-php-security-checker --path=./composer.lock --format=json > result.json
+        continue-on-error: true
+
+      - name: List files
+        run: ls -l -a
+
+      - name: Print File
+        run: cat result.json
+
+      - name: S3 File Upload
+        uses: shallwefootball/s3-upload-action@master
+        id: S3
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: './'
